@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🚛 Puťovka</title>
+
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+<div class="container">
+
+<h1>🚛 Puťovka</h1>
+
+<button class="add" onclick="addSection()">+ Přidat úsek</button> <button class="clear" onclick="clearAll()">Smazat vše</button>
+
+<div id="sections"></div>
+
+<div class="card">
+<b>⛽ Palivo a km</b>
+
+Počáteční km: <input id="kmStart" type="number">
+
+Konečné km: <input id="kmEnd" type="number">
+
+Počáteční palivo (l): <input id="fuelStart" type="number">
+
+Konečné palivo (l): <input id="fuelEnd" type="number">
+
+<div id="fuelResult"></div>
+</div>
+
+<div class="summary" id="summary"></div>
+
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
