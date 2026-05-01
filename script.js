@@ -117,7 +117,7 @@ function calcFuel() {
   let fS = parseFloat(document.getElementById("fuelStart").value);
   let fE = parseFloat(document.getElementById("fuelEnd").value);
 
-  if (!kmS || !kmE || !fS || !fE) return;
+  if (kmS == null || kmE == null || fS == null || fE == null) return;
 
   let km = kmE - kmS;
   let fuel = fS - fE;
