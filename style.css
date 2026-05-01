@@ -23,9 +23,17 @@ border-radius: 10px;
 font-size: 16px;
 }
 
-.add { background: #007bff; color: white; }
+.add { 
+    background: #007bff;
+    color: white;
+}
+.add:hover{
+    cursor: pointer;
+}
 .clear { background: red; color: white; }
-
+.clear:hover{
+    cursor: pointer;
+}
 .card {
 background: white;
 padding: 10px;
