@@ -29,9 +29,9 @@ render();
 }
 
 function update(i, key, value) {
-data[i][key] = value;
-save();
-calc();
+  data[i][key] = value;
+  save();
+  render();
 }
 
 function removeSection(i) {
