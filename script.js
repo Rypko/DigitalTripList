@@ -78,7 +78,6 @@ function calc() {
   for (let i = 0; i < data.length; i++) {
     let d = data[i];
 
-    ```
     d.calculatedWait = calculateWait(d.arrival, d.departure, d.load);
     totalLoad += parseTime(d.load);
     totalWait += d.calculatedWait;
@@ -91,23 +90,24 @@ function calc() {
       let drive = diffTime(d.departure, next.arrival);
       d.calculatedDrive = drive;
       totalDrive += drive;
+    } else {
+      d.calculatedDrive = 0;
     }
-    ```
-
-}
+  }
 
   let totalAll = totalDrive + totalBreak + totalLoad + totalWait;
 
-  document.getElementById("summary").innerHTML = ` <b>Souhrn</b><br>
-  Jízda: ${fmt(totalDrive)}<br>
-  Pauzy: ${fmt(totalBreak)}<br>
-  Nakládka: ${fmt(totalLoad)}<br>
-  Čekání: ${fmt(totalWait)}<br>
+  document.getElementById("summary").innerHTML = `
+    <b>Souhrn</b><br>
+    Jízda: ${fmt(totalDrive)}<br>
+    Pauzy: ${fmt(totalBreak)}<br>
+    Nakládka: ${fmt(totalLoad)}<br>
+    Čekání: ${fmt(totalWait)}<br>
 
-  <hr>
-  <b>Celkem: ${fmt(totalAll)}</b><br><br>
-  Km ložené: ${totalKmLoad}<br>
-  Km prázdné: ${totalKmEmpty}
+    <hr>
+    <b>Celkem: ${fmt(totalAll)}</b><br><br>
+    Km ložené: ${totalKmLoad}<br>
+    Km prázdné: ${totalKmEmpty}
   `;
 }
 
