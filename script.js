@@ -132,53 +132,53 @@ document.getElementById("fuelResult").innerHTML = `   Najeto: ${km} km<br>
 }
 
 function render() {
-let html = "";
+  calc(); // <-- FIRST recalc everything
 
-data.forEach((d, i) => {
-html += ` <div class="card"> <b>Úsek ${i+1}</b><br>
+  let html = "";
 
-```
-  Datum:
-  <input type="date" value="${d.date}" onchange="update(${i},'date',this.value)">
+  data.forEach((d, i) => {
+    html += `
+    <div class="card">
+      <b>Úsek ${i+1}</b><br>
 
-  Místo:
-  <input value="${d.place}" onchange="update(${i},'place',this.value)">
+      Datum:
+      <input type="date" value="${d.date}" onchange="update(${i},'date',this.value)">
 
-  <div class="row">
-    <input type="time" value="${d.arrival}" onchange="update(${i},'arrival',this.value)">
-    <input type="time" value="${d.departure}" onchange="update(${i},'departure',this.value)">
-  </div>
+      Místo:
+      <input value="${d.place}" onchange="update(${i},'place',this.value)">
 
-  Nakládka:
-  <input type="time" value="${d.load}" onchange="update(${i},'load',this.value)">
+      <div class="row">
+        <input type="time" value="${d.arrival}" onchange="update(${i},'arrival',this.value)">
+        <input type="time" value="${d.departure}" onchange="update(${i},'departure',this.value)">
+      </div>
 
-  Čekání:
-  <b>${fmt(d.calculatedWait)}</b>
+      Nakládka:
+      <input type="time" value="${d.load}" onchange="update(${i},'load',this.value)">
 
-  <hr>
+      Čekání:
+      <b>${fmt(d.calculatedWait)}</b>
 
-  Jízda:
-  <b>${fmt(d.calculatedDrive)}</b>
+      <hr>
 
-  Bezp. pauza:
-  <input type="time" value="${d.break}" onchange="update(${i},'break',this.value)">
+      Jízda:
+      <b>${fmt(d.calculatedDrive)}</b>
 
-  Km ložené:
-  <input type="number" value="${d.kmLoad}" onchange="update(${i},'kmLoad',this.value)">
+      Bezp. pauza:
+      <input type="time" value="${d.break}" onchange="update(${i},'break',this.value)">
 
-  Km prázdné:
-  <input type="number" value="${d.kmEmpty}" onchange="update(${i},'kmEmpty',this.value)">
+      Km ložené:
+      <input type="number" value="${d.kmLoad}" onchange="update(${i},'kmLoad',this.value)">
 
-  <button onclick="removeSection(${i})">Smazat</button>
-</div>
-`;
-```
+      Km prázdné:
+      <input type="number" value="${d.kmEmpty}" onchange="update(${i},'kmEmpty',this.value)">
 
-});
+      <button onclick="removeSection(${i})">Smazat</button>
+    </div>
+    `;
+  });
 
-document.getElementById("sections").innerHTML = html;
-save();
-calc();
+  document.getElementById("sections").innerHTML = html;
+  save();
 }
 
 // napojení fuel inputů
