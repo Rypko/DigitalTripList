@@ -161,7 +161,7 @@ function render() {
     </div>
     <div class="card">
       Jízda:
-      <b>${fmt(d.calculatedDrive)}</b>
+      <b>${fmt(d.calculatedDrive - d.break)}</b>
       <br/>
       Bezp. pauza:
       <input type="time" value="${d.break}" onchange="update(${i},'break',this.value)">
