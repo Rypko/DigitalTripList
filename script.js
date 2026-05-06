@@ -158,11 +158,11 @@ function render() {
       Čekání:
       <b>${fmt(d.calculatedWait)}</b>
 
-      <hr>
-
+    </div>
+    <div class="card">
       Jízda:
       <b>${fmt(d.calculatedDrive)}</b>
-
+      <br/>
       Bezp. pauza:
       <input type="time" value="${d.break}" onchange="update(${i},'break',this.value)">
 
