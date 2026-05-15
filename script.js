@@ -77,7 +77,7 @@ function calcSummary(sections) {
     totalLoad   += parseTime(d.load);
     totalWait   += sections[i].waitMin;
     totalBreak  += parseTime(d.break);
-    totalDrive  += sections[i].driveMin;
+    totalDrive  += sections[i].netDriveMin;
     totalKmLoad  += parseInt(d.kmLoad)  || 0;
     totalKmEmpty += parseInt(d.kmEmpty) || 0;
   });
@@ -86,7 +86,7 @@ function calcSummary(sections) {
 
   document.getElementById("summary").innerHTML = `
     <b>Souhrn</b><br>
-    Jízda (hrubá): ${fmt(totalDrive)}<br>
+    Jízda: ${fmt(totalDrive)}<br>
     Pauzy: ${fmt(totalBreak)}<br>
     Nakládka: ${fmt(totalLoad)}<br>
     Čekání: ${fmt(totalWait)}<br>
@@ -149,13 +149,11 @@ function render() {
       </div>
 
       <div class="card">
-        ${isLast
-          ? `<i>Poslední úsek — jízda se počítá z odjezdu na příjezd následujícího úseku.</i>`
-          : `
-            Jízda (hrubá): <b>${fmt(driveMin)}</b><br>
+        ${
+           `
             Bezp. pauza:
             <input type="time" value="${d.break}" onchange="update(${i},'break',this.value)">
-            Jízda (čistá): <b>${fmt(netDriveMin)}</b>
+            Jízda: <b>${fmt(netDriveMin)}</b><br>
           `
         }
 
