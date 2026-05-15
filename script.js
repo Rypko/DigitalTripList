@@ -6,7 +6,7 @@ function save() {
 
 function addSection() {
   data.push({
-    date: new Date().toISOString().split('T')[0],
+    date: new Date().toISOString().split("T")[0],
     place: "",
     arrival: "",
     departure: "",
@@ -14,8 +14,6 @@ function addSection() {
     break: "",
     kmLoad: "",
     kmEmpty: "",
-    calculatedWait: 0,
-    calculatedDrive: 0
   });
   render();
 }
@@ -36,74 +34,62 @@ function update(i, key, value) {
 
 function removeSection(i) {
   data.splice(i, 1);
+  save();
   render();
 }
 
 function parseTime(t) {
   if (!t) return 0;
-  let p = t.split(":");
-  return parseInt(p[0])*60 + parseInt(p[1]);
+  const [h, m] = t.split(":").map(Number);
+  return h * 60 + m;
 }
 
 function diffTime(start, end) {
   if (!start || !end) return 0;
-  let s = parseTime(start);
-  let e = parseTime(end);
-  let diff = e - s;
-  if (diff < 0) diff += 1440;
+  let diff = parseTime(end) - parseTime(start);
+  if (diff < 0) diff += 1440; // přes půlnoc
   return diff;
 }
 
-function calculateWait(arr, dep, load) {
-  let total = diffTime(arr, dep);
-  let l = parseTime(load);
-  let w = total - l;
-  return w > 0 ? w : 0;
-}
-
 function fmt(min) {
-  let h = Math.floor(min/60);
-  let m = min%60;
-  return h + "h " + m + "m";
+  const h = Math.floor(min / 60);
+  const m = min % 60;
+  return `${h}h ${m}m`;
 }
 
-function calc() {
-  let totalDrive = 0;
-  let totalBreak = 0;
-  let totalLoad = 0;
-  let totalWait = 0;
-  let totalKmLoad = 0;
-  let totalKmEmpty = 0;
+// Vrátí vypočtené hodnoty pro každý úsek (nezapisuje do data[])
+function calcSections() {
+  return data.map((d, i) => {
+    const waitMin = Math.max(0, diffTime(d.arrival, d.departure) - parseTime(d.load));
+    const driveMin = i < data.length - 1
+      ? diffTime(d.departure, data[i + 1].arrival)
+      : 0;
+    const netDriveMin = Math.max(0, driveMin - parseTime(d.break));
+    return { waitMin, driveMin, netDriveMin };
+  });
+}
 
-  for (let i = 0; i < data.length; i++) {
-    let d = data[i];
+function calcSummary(sections) {
+  let totalDrive = 0, totalBreak = 0, totalLoad = 0, totalWait = 0;
+  let totalKmLoad = 0, totalKmEmpty = 0;
 
-    d.calculatedWait = calculateWait(d.arrival, d.departure, d.load);
-    totalLoad += parseTime(d.load);
-    totalWait += d.calculatedWait;
-    totalBreak += parseTime(d.break);
-    totalKmLoad += parseInt(d.kmLoad) || 0;
+  data.forEach((d, i) => {
+    totalLoad   += parseTime(d.load);
+    totalWait   += sections[i].waitMin;
+    totalBreak  += parseTime(d.break);
+    totalDrive  += sections[i].driveMin;
+    totalKmLoad  += parseInt(d.kmLoad)  || 0;
     totalKmEmpty += parseInt(d.kmEmpty) || 0;
+  });
 
-    if (i < data.length - 1) {
-      let next = data[i+1];
-      let drive = diffTime(d.departure, next.arrival);
-      d.calculatedDrive = drive;
-      totalDrive += drive;
-    } else {
-      d.calculatedDrive = 0;
-    }
-  }
-
-  let totalAll = totalDrive + totalBreak + totalLoad + totalWait;
+  const totalAll = totalDrive + totalBreak + totalLoad + totalWait;
 
   document.getElementById("summary").innerHTML = `
     <b>Souhrn</b><br>
-    Jízda: ${fmt(totalDrive)}<br>
+    Jízda (hrubá): ${fmt(totalDrive)}<br>
     Pauzy: ${fmt(totalBreak)}<br>
     Nakládka: ${fmt(totalLoad)}<br>
     Čekání: ${fmt(totalWait)}<br>
-
     <hr>
     <b>Celkem: ${fmt(totalAll)}</b><br><br>
     Km ložené: ${totalKmLoad}<br>
@@ -112,76 +98,82 @@ function calc() {
 }
 
 function calcFuel() {
-  let kmS = parseFloat(document.getElementById("kmStart").value);
-  let kmE = parseFloat(document.getElementById("kmEnd").value);
-  let fS = parseFloat(document.getElementById("fuelStart").value);
-  let fE = parseFloat(document.getElementById("fuelEnd").value);
+  const kmS = parseFloat(document.getElementById("kmStart").value);
+  const kmE = parseFloat(document.getElementById("kmEnd").value);
+  const fS  = parseFloat(document.getElementById("fuelStart").value);
+  const fE  = parseFloat(document.getElementById("fuelEnd").value);
 
-  if (kmS == null || kmE == null || fS == null || fE == null) return;
+  if (isNaN(kmS) || isNaN(kmE) || isNaN(fS) || isNaN(fE)) return;
 
-  let km = kmE - kmS;
-  let fuel = fS - fE;
+  const km   = kmE - kmS;
+  const fuel = fS - fE;
 
   if (km <= 0 || fuel <= 0) return;
 
-  let cons = (fuel / km) * 100;
+  const cons = (fuel / km) * 100;
 
-  document.getElementById("fuelResult").innerHTML = `   Najeto: ${km} km<br>
-    Spotřebováno: ${fuel.toFixed(1)} l<br>   <b>Spotřeba: ${cons.toFixed(1)} l/100 km</b>
-    `;
+  document.getElementById("fuelResult").innerHTML = `
+    Najeto: ${km} km<br>
+    Spotřebováno: ${fuel.toFixed(1)} l<br>
+    <b>Spotřeba: ${cons.toFixed(1)} l/100 km</b>
+  `;
 }
 
 function render() {
-  calc(); // <-- FIRST recalc everything
+  const sections = calcSections();
+  calcSummary(sections);
 
-  let html = "";
+  const html = data.map((d, i) => {
+    const { waitMin, driveMin, netDriveMin } = sections[i];
+    const isLast = i === data.length - 1;
 
-  data.forEach((d, i) => {
-    html += `
-    <div class="card">
-      <b>Úsek ${i+1}</b><br>
+    return `
+      <div class="card">
+        <b>Úsek ${i + 1}</b><br>
 
-      Datum:
-      <input type="date" value="${d.date}" onchange="update(${i},'date',this.value)">
+        Datum:
+        <input type="date" value="${d.date}" onchange="update(${i},'date',this.value)">
 
-      Místo:
-      <input value="${d.place}" onchange="update(${i},'place',this.value)">
+        Místo:
+        <input value="${d.place}" onchange="update(${i},'place',this.value)">
 
-      <div class="row">
-        <input type="time" value="${d.arrival}" onchange="update(${i},'arrival',this.value)">
-        <input type="time" value="${d.departure}" onchange="update(${i},'departure',this.value)">
+        <div class="row">
+          <input type="time" value="${d.arrival}"   onchange="update(${i},'arrival',this.value)"   title="Příjezd">
+          <input type="time" value="${d.departure}" onchange="update(${i},'departure',this.value)" title="Odjezd">
+        </div>
+
+        Nakládka:
+        <input type="time" value="${d.load}" onchange="update(${i},'load',this.value)">
+
+        Čekání: <b>${fmt(waitMin)}</b>
       </div>
 
-      Nakládka:
-      <input type="time" value="${d.load}" onchange="update(${i},'load',this.value)">
+      <div class="card">
+        ${isLast
+          ? `<i>Poslední úsek — jízda se počítá z odjezdu na příjezd následujícího úseku.</i>`
+          : `
+            Jízda (hrubá): <b>${fmt(driveMin)}</b><br>
+            Bezp. pauza:
+            <input type="time" value="${d.break}" onchange="update(${i},'break',this.value)">
+            Jízda (čistá): <b>${fmt(netDriveMin)}</b>
+          `
+        }
 
-      Čekání:
-      <b>${fmt(d.calculatedWait)}</b>
+        Km ložené:
+        <input type="number" value="${d.kmLoad}"  onchange="update(${i},'kmLoad',this.value)">
 
-    </div>
-    <div class="card">
-      Jízda:
-      <b>${fmt(d.calculatedDrive) - fmt(d.break)}</b>
-      <br/>
-      Bezp. pauza:
-      <input type="time" value="${d.break}" onchange="update(${i},'break',this.value)">
+        Km prázdné:
+        <input type="number" value="${d.kmEmpty}" onchange="update(${i},'kmEmpty',this.value)">
 
-      Km ložené:
-      <input type="number" value="${d.kmLoad}" onchange="update(${i},'kmLoad',this.value)">
-
-      Km prázdné:
-      <input type="number" value="${d.kmEmpty}" onchange="update(${i},'kmEmpty',this.value)">
-
-      <button onclick="removeSection(${i})">Smazat</button>
-    </div>
+        <button onclick="removeSection(${i})">Smazat</button>
+      </div>
     `;
-  });
+  }).join("");
 
   document.getElementById("sections").innerHTML = html;
   save();
 }
 
-// napojení fuel inputů
 document.addEventListener("input", calcFuel);
 
 render();
