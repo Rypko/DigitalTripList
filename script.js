@@ -70,16 +70,16 @@ function calcSections() {
 }
 
 function calcSummary(sections) {
-  let totalDrive = 0, totalBreak = 0, totalLoad = 0, totalWait = 0;
-  let totalKmLoad = 0, totalKmEmpty = 0;
+  let totalDrive = 0.0, totalBreak = 0.0, totalLoad = 0.0, totalWait = 0.0;
+  let totalKmLoad = 0.0, totalKmEmpty = 0.0;
 
   data.forEach((d, i) => {
     totalLoad   += parseTime(d.load);
     totalWait   += sections[i].waitMin;
     totalBreak  += parseTime(d.break);
     totalDrive  += sections[i].netDriveMin;
-    totalKmLoad  += parseInt(d.kmLoad)  || 0;
-    totalKmEmpty += parseInt(d.kmEmpty) || 0;
+    totalKmLoad  += parseFloat(d.kmLoad)  || 0;
+    totalKmEmpty += parseFloat(d.kmEmpty) || 0;
   });
 
   const totalAll = totalDrive + totalBreak + totalLoad + totalWait;
@@ -92,8 +92,8 @@ function calcSummary(sections) {
     Čekání: ${fmt(totalWait)}<br>
     <hr>
     <b>Celkem: ${fmt(totalAll)}</b><br><br>
-    Km ložené: ${totalKmLoad}<br>
-    Km prázdné: ${totalKmEmpty}
+    Km ložené: ${totalKmLoad.toFixed(1)}<br>
+    Km prázdné: ${totalKmEmpty.toFixed(1)}
   `;
 }
 
