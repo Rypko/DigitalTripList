@@ -98,23 +98,34 @@ function calcSummary(sections) {
 }
 
 function calcFuel() {
-  const kmS = parseFloat(document.getElementById("kmStart").value);
-  const kmE = parseFloat(document.getElementById("kmEnd").value);
-  const fS  = parseFloat(document.getElementById("fuelStart").value);
-  const fE  = parseFloat(document.getElementById("fuelEnd").value);
+  const kmS  = parseFloat(document.getElementById("kmStart").value);
+  const kmE  = parseFloat(document.getElementById("kmEnd").value);
+  const fS   = parseFloat(document.getElementById("fuelStart").value);
+  const fE   = parseFloat(document.getElementById("fuelEnd").value);
+  const el   = document.getElementById("fuelResult");
 
-  if (isNaN(kmS) || isNaN(kmE) || isNaN(fS) || isNaN(fE)) return;
+  if ([kmS, kmE, fS, fE].some(isNaN)) {
+    el.innerHTML = "";
+    return;
+  }
 
   const km   = kmE - kmS;
-  const fuel = fS - fE;
+  const fuel = fE - fS;  // ← otočeno: konečné − počáteční
 
-  if (km <= 0 || fuel <= 0) return;
+  if (km <= 0) {
+    el.innerHTML = `<span style="color:red">Konečné km musí být větší než počáteční.</span>`;
+    return;
+  }
+  if (fuel <= 0) {
+    el.innerHTML = `<span style="color:red">Konečné palivo musí být větší než počáteční.</span>`;  // ← otočeno
+    return;
+  }
 
   const cons = (fuel / km) * 100;
 
-  document.getElementById("fuelResult").innerHTML = `
-    Najeto: ${km} km<br>
-    Spotřebováno: ${fuel.toFixed(1)} l<br>
+  el.innerHTML = `
+    Najeto: <b>${km} km</b><br>
+    Natankováno: <b>${fuel.toFixed(1)} l</b><br>
     <b>Spotřeba: ${cons.toFixed(1)} l/100 km</b>
   `;
 }
