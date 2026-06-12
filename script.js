@@ -1,7 +1,27 @@
 let data = JSON.parse(localStorage.getItem("putovka") || "[]");
 
+// Fuel data persistence
+let fuelData = JSON.parse(localStorage.getItem("putovka_fuel") || "{}");
+
 function save() {
   localStorage.setItem("putovka", JSON.stringify(data));
+}
+
+function saveFuel() {
+  fuelData = {
+    kmStart:   document.getElementById("kmStart").value,
+    kmEnd:     document.getElementById("kmEnd").value,
+    fuelStart: document.getElementById("fuelStart").value,
+    fuelEnd:   document.getElementById("fuelEnd").value,
+  };
+  localStorage.setItem("putovka_fuel", JSON.stringify(fuelData));
+}
+
+function loadFuel() {
+  if (fuelData.kmStart   !== undefined) document.getElementById("kmStart").value   = fuelData.kmStart;
+  if (fuelData.kmEnd     !== undefined) document.getElementById("kmEnd").value     = fuelData.kmEnd;
+  if (fuelData.fuelStart !== undefined) document.getElementById("fuelStart").value = fuelData.fuelStart;
+  if (fuelData.fuelEnd   !== undefined) document.getElementById("fuelEnd").value   = fuelData.fuelEnd;
 }
 
 function addSection() {
@@ -11,7 +31,7 @@ function addSection() {
     arrival: "",
     departure: "",
     load: "",
-    break: "0:00",
+    break: "",
     kmLoad: "",
     kmEmpty: "",
   });
@@ -70,16 +90,16 @@ function calcSections() {
 }
 
 function calcSummary(sections) {
-  let totalDrive = 0.0, totalBreak = 0.0, totalLoad = 0.0, totalWait = 0.0;
-  let totalKmLoad = 0.0, totalKmEmpty = 0.0;
+  let totalDrive = 0, totalBreak = 0, totalLoad = 0, totalWait = 0;
+  let totalKmLoad = 0, totalKmEmpty = 0;
 
   data.forEach((d, i) => {
     totalLoad   += parseTime(d.load);
     totalWait   += sections[i].waitMin;
     totalBreak  += parseTime(d.break);
     totalDrive  += sections[i].netDriveMin;
-    totalKmLoad  += parseFloat(d.kmLoad)  || 0;
-    totalKmEmpty += parseFloat(d.kmEmpty) || 0;
+    totalKmLoad  += parseInt(d.kmLoad)  || 0;
+    totalKmEmpty += parseInt(d.kmEmpty) || 0;
   });
 
   const totalAll = totalDrive + totalBreak + totalLoad + totalWait;
@@ -92,40 +112,31 @@ function calcSummary(sections) {
     Čekání: ${fmt(totalWait)}<br>
     <hr>
     <b>Celkem: ${fmt(totalAll)}</b><br><br>
-    Km ložené: ${totalKmLoad.toFixed(1)}<br>
-    Km prázdné: ${totalKmEmpty.toFixed(1)}
+    Km ložené: ${totalKmLoad}<br>
+    Km prázdné: ${totalKmEmpty}
   `;
 }
 
 function calcFuel() {
-  const kmS  = parseFloat(document.getElementById("kmStart").value);
-  const kmE  = parseFloat(document.getElementById("kmEnd").value);
-  const fS   = parseFloat(document.getElementById("fuelStart").value);
-  const fE   = parseFloat(document.getElementById("fuelEnd").value);
-  const el   = document.getElementById("fuelResult");
+  saveFuel(); // Uložit při každé změně
 
-  if ([kmS, kmE, fS, fE].some(isNaN)) {
-    el.innerHTML = "";
-    return;
-  }
+  const kmS = parseFloat(document.getElementById("kmStart").value);
+  const kmE = parseFloat(document.getElementById("kmEnd").value);
+  const fS  = parseFloat(document.getElementById("fuelStart").value);
+  const fE  = parseFloat(document.getElementById("fuelEnd").value);
+
+  if (isNaN(kmS) || isNaN(kmE) || isNaN(fS) || isNaN(fE)) return;
 
   const km   = kmE - kmS;
-  const fuel = fE - fS;  // ← otočeno: konečné − počáteční
+  const fuel = fS - fE;
 
-  if (km <= 0) {
-    el.innerHTML = `<span style="color:red">Konečné km musí být větší než počáteční.</span>`;
-    return;
-  }
-  if (fuel <= 0) {
-    el.innerHTML = `<span style="color:red">Konečné palivo musí být větší než počáteční.</span>`;  // ← otočeno
-    return;
-  }
+  if (km <= 0 || fuel <= 0) return;
 
   const cons = (fuel / km) * 100;
 
-  el.innerHTML = `
-    Najeto: <b>${km} km</b><br>
-    Natankováno: <b>${fuel.toFixed(1)} l</b><br>
+  document.getElementById("fuelResult").innerHTML = `
+    Najeto: ${km} km<br>
+    Spotřebováno: ${fuel.toFixed(1)} l<br>
     <b>Spotřeba: ${cons.toFixed(1)} l/100 km</b>
   `;
 }
@@ -186,3 +197,5 @@ function render() {
 document.addEventListener("input", calcFuel);
 
 render();
+loadFuel();  // Načíst uložené hodnoty paliva po renderu
+calcFuel();  // Přepočítat výsledek pokud jsou data k dispozici
