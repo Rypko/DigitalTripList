@@ -11,7 +11,7 @@ function addSection() {
     arrival: "",
     departure: "",
     load: "",
-    break: "",
+    break: "0:00",
     kmLoad: "",
     kmEmpty: "",
   });
