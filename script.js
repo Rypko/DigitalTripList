@@ -43,6 +43,11 @@ function clearAll() {
     data = [];
     save();
     render();
+    document.getElementById("kmStart").value = "";
+    document.getElementById("kmEnd").value = "";
+    document.getElementById("fuelStart").value = "";
+    document.getElementById("fuelEnd").value = "";
+    document.getElementById("fuelResult").innerHTML = "";
   }
 }
 
@@ -127,8 +132,8 @@ function calcFuel() {
 
   if (isNaN(kmS) || isNaN(kmE) || isNaN(fS) || isNaN(fE)) return;
 
-  const km   = kmE - kmS;
-  const fuel = fS - fE;
+  const km   = parseFloat((kmE - kmS).toFixed(1));
+  const fuel = parseFloat((fE - fS).toFixed(1));
 
   if (km <= 0 || fuel <= 0) return;
 
