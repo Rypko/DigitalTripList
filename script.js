@@ -103,8 +103,8 @@ function calcSummary(sections) {
     totalWait   += sections[i].waitMin;
     totalBreak  += parseTime(d.break);
     totalDrive  += sections[i].netDriveMin;
-    totalKmLoad  += parseInt(d.kmLoad)  || 0;
-    totalKmEmpty += parseInt(d.kmEmpty) || 0;
+    totalKmLoad  += parseFloat(d.kmLoad)  || 0;
+    totalKmEmpty += parseFloat(d.kmEmpty) || 0;
   });
 
   const totalAll = totalDrive + totalBreak + totalLoad + totalWait;
